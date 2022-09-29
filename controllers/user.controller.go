@@ -38,7 +38,7 @@ func CreateUser(c echo.Context) error {
 		log.Fatal(err)
 	}
 	return c.JSON(http.StatusCreated, &echo.Map{
-		"status": "success",
+		"status": http.StatusCreated,
 		"_id":    res.InsertedID,
 	})
 }
@@ -46,38 +46,56 @@ func GetUser(c echo.Context) error {
 	var id = c.Param("id")
 	IdObject, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return c.JSON(http.StatusOK, &echo.Map{
-			"status":  "failure",
+		return c.JSON(http.StatusBadRequest, &echo.Map{
+			"status":  http.StatusBadRequest,
 			"message": "Id invalid",
 		})
 	}
 	var user models.User
 	err = userCollection.FindOne(context.TODO(), bson.D{{"_id", IdObject}}).Decode(&user)
-	return c.JSON(http.StatusOK, user)
+	if user.Name != "" && user.Email != "" {
+		return c.JSON(http.StatusOK, user)
+	} else {
+		return c.JSON(http.StatusNotFound, &echo.Map{
+			"status":  http.StatusNotFound,
+			"message": "User not found",
+		})
+	}
+
 }
 func DeleteUser(c echo.Context) error {
 	var id = c.Param("id")
 	IdObject, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return c.JSON(http.StatusOK, &echo.Map{
-			"status":  "failure",
+		return c.JSON(http.StatusBadRequest, &echo.Map{
+			"status":  http.StatusBadRequest,
 			"message": "Id invalid",
 		})
 	}
-	var rs models.User
-	err = userCollection.FindOneAndDelete(context.TODO(), bson.D{{"_id", IdObject}}).Decode(&rs)
-	return c.JSON(http.StatusOK, &echo.Map{
-		"status":  "success",
-		"message": "Deleted user successfully!",
-	})
+	var user models.User
+	err = userCollection.FindOne(context.TODO(), bson.D{{"_id", IdObject}}).Decode(&user)
+	if user.Name == "" && user.Email == "" {
+		return c.JSON(http.StatusNotFound, &echo.Map{
+			"status":  http.StatusNotFound,
+			"message": "User not found",
+		})
+	} else {
+		var rs models.User
+		err = userCollection.FindOneAndDelete(context.TODO(), bson.D{{"_id", IdObject}}).Decode(&rs)
+		return c.JSON(http.StatusOK, &echo.Map{
+			"status":  http.StatusOK,
+			"message": "Deleted user successfully!",
+		})
+	}
+
 }
 
 func UpdateUser(c echo.Context) error {
 	var id = c.Param("id")
 	IdObject, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return c.JSON(http.StatusOK, &echo.Map{
-			"status":  "failure",
+		return c.JSON(http.StatusBadRequest, &echo.Map{
+			"status":  http.StatusBadRequest,
 			"message": "Id invalid",
 		})
 	}
@@ -85,22 +103,32 @@ func UpdateUser(c echo.Context) error {
 	if err := c.Bind(&updateUser); err != nil {
 		return err
 	}
-	filter := bson.D{{"_id", IdObject}}
-	update := bson.D{{"$set", bson.D{{"name", updateUser.Name}, {"email", updateUser.Email}}}}
-	result, err := userCollection.UpdateOne(context.TODO(), filter, update)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if result.MatchedCount != 0 {
-		return c.JSON(http.StatusOK, &echo.Map{
-			"status": "success",
-			"item":   "Updated todo successfully!",
-		})
+	var user models.User
+	err = userCollection.FindOne(context.TODO(), bson.D{{"_id", IdObject}}).Decode(&user)
+	if user.Email != "" && user.Name != "" {
+		filter := bson.D{{"_id", IdObject}}
+		update := bson.D{{"$set", bson.D{{"name", updateUser.Name}, {"email", updateUser.Email}}}}
+		result, err := userCollection.UpdateOne(context.TODO(), filter, update)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if result.MatchedCount != 0 {
+			return c.JSON(http.StatusOK, &echo.Map{
+				"status": http.StatusOK,
+				"item":   "Updated todo successfully!",
+			})
 
+		} else {
+			return c.JSON(http.StatusBadRequest, &echo.Map{
+				"status":  http.StatusBadRequest,
+				"message": "Todo update failure!",
+			})
+		}
 	} else {
-		return c.JSON(http.StatusBadRequest, &echo.Map{
-			"status":  "failure",
-			"message": "Todo update failure!",
+		return c.JSON(http.StatusNotFound, &echo.Map{
+			"status":  http.StatusNotFound,
+			"message": "User not found",
 		})
 	}
+
 }
