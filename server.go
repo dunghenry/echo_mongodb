@@ -14,5 +14,6 @@ func main() {
 	e.Use(middleware.Recover())
 	configs.ConnectDB()
 	routes.UserRoute(e)
+	routes.PostRoute(e)
 	e.Logger.Fatal(e.Start("localhost:8080"))
 }
