@@ -1,0 +1,23 @@
+{
+  "name": "echo_framework",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watch": "node-sass --watch scss/ --output public/styles/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dunghenry/echo_mongodb_mvc.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dunghenry/echo_mongodb_mvc/issues"
+  },
+  "homepage": "https://github.com/dunghenry/echo_mongodb_mvc#readme",
+  "devDependencies": {
+    "node-sass": "^7.0.3"
+  }
+}

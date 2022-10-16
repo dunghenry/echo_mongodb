@@ -1,0 +1,6 @@
+README.md
+.gitignore
+.air.toml
+Dockerfile
+tmp
+dockerignore

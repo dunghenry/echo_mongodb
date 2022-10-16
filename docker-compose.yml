@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  backend:
+    container_name: echo
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    env_file: .env
+    networks:
+      - trandung
+networks:
+  trandung:
