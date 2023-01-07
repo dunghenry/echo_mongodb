@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"trandung/api/configs"
@@ -16,6 +17,8 @@ import (
 var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
 
 func GetUsers(c echo.Context) error {
+	data := c.Request().Header.Get("token")
+	fmt.Println(data)
 	cur, err := userCollection.Find(context.Background(), bson.D{})
 	if err != nil {
 		log.Fatal(err)
